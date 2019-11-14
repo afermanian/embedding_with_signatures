@@ -108,9 +108,62 @@ class InputSig:
 		self.ll=ll
 
 		if self.data=='quick_draw':
-			self.fit_word_encoder(n_samples=10)
+			self.fit_word_encoder(n_samples=10*340)
 		else:
 			self.fit_word_encoder()
+
+	def get_inputs(self,n_samples=10*340,start_row=0):
+		""" Returns a data frame and a vector of labels for each dataset.
+
+		Parameters
+		----------
+		n_samples: int, default=10
+			Number of samples to output.
+
+		start_row: int, default=0
+			Row number at which we start reading inputs.
+
+		Returns
+		-------
+		df: pandas dataframe, shape (n_samples,)
+			Dataframe with one column named 'file' that contains the file
+			argument of path_to_sig for each sample.
+
+		y: array, shape (n_samples,1)
+			Array of labels from word_encoder corresponding to each row of df.
+		"""
+		
+		if self.data=='motion_sense':
+			df=pd.read_csv(
+				os.path.join(
+					data_dir,'MotionSense/motion_sense_shuffled_paths.csv'),
+				nrows=n_samples, skiprows=start_row,index_col=0)
+			df.columns=['file','Class']
+
+		elif self.data=='urban_sound':
+			base_dir =os.path.join(data_dir,'urban-sound-classification/train')
+			df = pd.read_csv(os.path.join(base_dir,'train.csv'),nrows=n_samples,
+
+				skiprows=start_row)
+			df.columns=['ID','Class']
+			df['file'] = df['ID'].apply(lambda x: base_dir+'/Train/'+str(x)+
+				'.wav')
+
+		elif self.data=='quick_draw':
+			n_samples=n_samples//340
+			all_train_paths = glob(
+				os.path.join(data_dir,'input','train_simplified','*.csv'))
+			out_df_list = []
+			for c_path in all_train_paths:
+				c_df = pd.read_csv(c_path, nrows=n_samples, skiprows=start_row)
+				c_df.columns=['countrycode', 'file', 'key_id', 'recognized', 
+				'timestamp', 'Class']
+				out_df_list += [c_df[['file', 'Class']]]
+			df = pd.concat(out_df_list)
+
+		print(df.head())
+		y=df['Class']
+		return(df,y)
 
 	def fit_word_encoder(self,n_samples=None):
 		""" Fit word encoder with labels of the dataset.
@@ -132,6 +185,9 @@ class InputSig:
 		else:
 			df,y=self.get_inputs(n_samples=n_samples)
 			self.word_encoder.fit(y)
+			print(
+				"Word encoder fitted with classes: ", 
+				self.word_encoder.classes_)
 			np.save('classes_%s.npy' %(self.data),self.word_encoder.classes_)
 
 	def data_to_path(self,file):
@@ -317,61 +373,6 @@ class InputSig:
 			The dimension of the signature vector.
 		"""
 		return(isig.siglength(self.get_embedding_dimension(),self.order))
-
-
-	def get_inputs(self,n_samples=10,start_row=0):
-		""" Returns a data frame and a vector of labels for each dataset.
-
-		Parameters
-		----------
-		n_samples: int, default=10
-			Number of samples to output.
-
-		start_row: int, default=0
-			Row number at which we start reading inputs.
-
-		Returns
-		-------
-		df: pandas dataframe, shape (n_samples,)
-			Dataframe with one column named 'file' that contains the file
-			argument of path_to_sig for each sample.
-
-		y: array, shape (n_samples,1)
-			Array of labels from word_encoder corresponding to each row of df.
-		"""
-
-		
-		if self.data=='motion_sense':
-			df=pd.read_csv(
-				os.path.join(
-					data_dir,'MotionSense/motion_sense_shuffled_paths.csv'),
-				nrows=n_samples, skiprows=start_row,index_col=0)
-			df.columns=['file','Class']
-
-		elif self.data=='urban_sound':
-			base_dir =os.path.join(data_dir,'urban-sound-classification/train')
-			df = pd.read_csv(os.path.join(base_dir,'train.csv'),nrows=n_samples,
-
-				skiprows=start_row)
-			df.columns=['ID','Class']
-			df['file'] = df['ID'].apply(lambda x: base_dir+'/Train/'+str(x)+
-				'.wav')
-
-		elif self.data=='quick_draw':
-			n_samples=n_samples//340
-			all_train_paths = glob(
-				os.path.join(data_dir,'input','train_simplified','*.csv'))
-			out_df_list = []
-			for c_path in all_train_paths:
-				c_df = pd.read_csv(c_path, nrows=n_samples, skiprows=start_row)
-				c_df.columns=['countrycode', 'file', 'key_id', 'recognized', 
-				'timestamp', 'Class']
-				out_df_list += [c_df[['file', 'Class']]]
-			df = pd.concat(out_df_list)
-
-		print(df.head())
-		y=df['Class']
-		return(df,y)
 
 
 
