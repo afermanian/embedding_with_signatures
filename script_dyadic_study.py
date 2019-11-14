@@ -10,13 +10,17 @@ from train_sig import LearnSig
 
 
 results_dir='results'
+if not os.path.exists(results_dir):
+	os.mkdir(results_dir)
 
 start_time=time.time()
 
 data=str(sys.argv[1])
 embedding='time'
 algo='neural_network'
-dyadic_level_list=np.arange(2)
+dyadic_level_list=np.arange(4)
+start_row=0
+n_processes=32
 
 if data=='motion_sense':
 	n_test_samples=30
@@ -40,9 +44,6 @@ elif data=='quick_draw':
 		'0':np.arange(10)+1,'1':np.arange(10)+1,'2':np.arange(9)+1,
 		'3':np.arange(8)+1,'4':np.arange(8)+1}
 
-
-start_row=0
-n_processes=32
 results_df=pd.DataFrame({
 	'accuracy':[],'embedding':[],'algo':[],'order':[],'dyadic_level':[],
 	'n_features':[]})
