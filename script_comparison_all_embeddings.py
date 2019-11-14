@@ -12,32 +12,44 @@ results_dir='results'
 
 start_time=time.time()
 
-data='motion_sense'
-embedding_list=['time','raw','lead_lag','rectilinear']
+data=str(sys.argv[1])
 algo_list=['neural_network','nearest_neighbors','random_forest','xgboost']
-order_dict={
-	'raw':(np.arange(5)+1),'time':np.arange(4)+1,'lead_lag':np.arange(3)+1,
-	'rectilinear':np.arange(5)+1}
 
 ll=1
+start_row=0
+n_processes=32
 
 if data=='motion_sense':
 	n_test_samples=30
 	n_valid_samples=30
 	n_train_samples=300
+	embedding_list=['time','raw','lead_lag','rectilinear']
+	order_dict={
+		'raw':(np.arange(5)+1),'time':np.arange(4)+1,'lead_lag':np.arange(3)+1,
+		'rectilinear':np.arange(5)+1}
+
 elif data=='urban_sound':
 	n_test_samples=500
 	n_valid_samples=500
 	n_train_samples=4435
+	embedding_list=['time','raw','lead_lag']
+	order_dict={
+		'raw':np.array([2,6,14,30,62,126,254,510]),'time':np.arange(12)+1,
+		'lead_lag':np.arange(8)+1}
+
 elif data=='quick_draw':
 	n_train_samples=200*340
 	n_valid_samples=20*340
 	n_test_samples=20*340
+	embedding_list=[
+		'time','raw','lead_lag','rectilinear','stroke_1','stroke_2','stroke_3']
+	order_dict={
+		'raw':(np.arange(12)+1),'time':np.arange(8)+1,'lead_lag':np.arange(6)+1,
+		'rectilinear':np.arange(12)+1,'stroke_1':np.arange(8)+1,
+		'stroke_2':np.arange(8)+1,'stroke_3':np.arange(8)+1}
 
-
-start_row=0
-n_processes=1
-results_df=pd.DataFrame({'accuracy':[],'embedding':[],'algo':[],'order':[]})
+results_df=pd.DataFrame(
+	{'accuracy':[],'embedding':[],'algo':[],'order':[],'n_features':[]})
 
 
 # Load input data 
@@ -70,7 +82,8 @@ for embedding in embedding_list:
 
 			results_df=results_df.append(
 				{'accuracy':test_results['accuracy'],'embedding':embedding,
-				'algo':algo,'order':order},ignore_index=True)
+				'algo':algo,'order':order,'n_features':train_X.shape[1]},
+				ignore_index=True)
 			print(results_df)
 
 
@@ -80,6 +93,8 @@ for embedding in embedding_list:
 			if not os.path.exists(all_results_dir):
 				os.mkdir(all_results_dir)
 
+			results_path=os.path.join(
+				all_results_dir,learnSig.model_name+".txt")
 			file = open(results_path,"w")
 
 			file.write("Dataset: %s \n" % (data))
@@ -104,5 +119,9 @@ for embedding in embedding_list:
 			file.write("Test results: %s" % (test_results))
 			file.close()
 
-results_df.to_csv(os.path.join(results_dir,'%s_all_results.csv'%(data)))
+results_df.to_csv(
+	os.path.join(results_dir,'%s_embedding_comparison.csv'%(data)))
+
+
+
 

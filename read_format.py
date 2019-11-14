@@ -105,9 +105,7 @@ class InputSig:
 		self.order=order
 
 		self.word_encoder=LabelEncoder()
-
-		if self.embedding=='lead_lag':
-			self.ll=ll
+		self.ll=ll
 
 		if self.data=='quick_draw':
 			self.fit_word_encoder(n_samples=10)
@@ -120,7 +118,7 @@ class InputSig:
 		Parameters
 		----------
 		n_samples: int, default=None
-			Number of samples to load to get labels.
+			Number of samples to load to get the labels.
 
 		Returns
 		-------
@@ -136,9 +134,9 @@ class InputSig:
 			self.word_encoder.fit(y)
 			np.save('classes_%s.npy' %(self.data),self.word_encoder.classes_)
 
-	def path_to_sig(self,file):
-		"""Read one sample and output its signature with the embedding selected
-		by self.embedding.
+	def data_to_path(self,file):
+		"""Read one sample and outputs its path with the embedding selected by
+		self.embedding
 
 		Parameters
 		----------
@@ -150,9 +148,9 @@ class InputSig:
 
 		Returns
 		-------
-		sig: array, shape (p)
-			Array containing signature coefficients computed on the embedded
-			path of the sample corresponding to file.
+		path: array, shape (n_points,d)
+			Array with points in R^d that should be linearly interpolated to get
+			the embedding.
 		"""
 
 
@@ -216,8 +214,75 @@ class InputSig:
 			signal=np.hstack((signal,np.linspace(0,1,num=n_points).reshape((
 				n_points,1))))
 			signal_path=create_rectilinear(signal)
-		sig=isig.sig(signal_path,self.order)
+		return(signal_path)
+
+	def path_to_sig(self,file):
+		"""Read one sample and output its signature with the embedding selected
+		by self.embedding.
+
+		Parameters
+		----------
+		file: str
+			- If data='quick_draw', it is the string containing the raw drawing
+			coordinates.
+			- If data='urban_sound' or 'motion_sense', it is the path to the
+			sample file.
+
+		Returns
+		-------
+		sig: array, shape (p)
+			Array containing signature coefficients computed on the embedded
+			path of the sample corresponding to file.
+		"""
+
+		path=self.data_to_path(file)
+		sig=isig.sig(path,self.order)
 		return(sig)
+
+	def path_to_dyadic_sig(self,file,dyadic_level):
+		"""Read one sample and output a vector containing a concatenation of
+		signature coefficients. The path is divided into 2^dyadic_levelsubpaths 
+		and a signature vector is computed on each subpath. All vectors
+		obtained in this way are then concatenated.
+
+		Parameters
+		----------
+		file: str
+			- If data='quick_draw', it is the string containing the raw drawing
+			coordinates.
+			- If data='urban_sound' or 'motion_sense', it is the path to the
+			sample file.
+
+		dyadic_level: int
+			It is the level of dyadic partitions considered. The path is divided
+			into 2^dyadic_level subpaths and signatures are computed on each
+			subpath.
+
+		Returns
+		-------
+		sig: array, shape (p)
+			A signature vector containing all signature coefficients. It is of
+			shape p=2^dyadic_level*self.get_sig_dimension().
+		"""
+		path=self.data_to_path(file)
+		n_points=np.shape(path)[0]
+		n_subpaths=2**dyadic_level
+		window_size=n_points//n_subpaths
+		
+		if n_subpaths>n_points:
+			path=np.vstack(
+				(path,np.zeros((n_subpaths-n_points,np.shape(path)[1]))))
+			window_size=1
+		siglength=self.get_sig_dimension()
+		sig=np.zeros(n_subpaths*siglength)
+		for i in range(n_subpaths):
+			if i==n_subpaths-1:
+				subpath=path[i*window_size:,:] 
+			else:
+				subpath=path[i*window_size:(i+1)*window_size,:]
+			sig[i*siglength:(i+1)*siglength]=isig.sig(subpath,self.order)
+		return(sig)
+
 
 	def get_embedding_dimension(self):
 		"""Returns the dimension of the output space of the embedded data.
@@ -310,9 +375,9 @@ class InputSig:
 
 
 
-def unwrap_path_to_sig(file,inputSig):
-	""" Unwrap the function path_to_sig from the object inputSig to allow
-	parallelization.
+def unwrap_path_to_sig(file,inputSig,dyadic_level=None):
+	""" Unwrap the functions path_to_sig and path_to_dyadic_sig from the object
+	inputSig to allow parallelization.
 
 	Parameters
 	----------
@@ -326,12 +391,26 @@ def unwrap_path_to_sig(file,inputSig):
 	inputSig: instance of the class InputSig
 		The obejct containing information about which data we are working
 		on and with which embedding.
+
+	dyadic_level: int, default=None
+		If not None, the function path_to_dyadic_sig is used and dyadic_level is
+		then the level of the dyadic partition considered. Otherwise the
+		function path_to_sig is outputed.
+
+	Returns
+	-------
+	sig: array, shape (p)
+		The signature vector, output of path_to_sig or path_to_dyadic_sig.
+
 	"""
-	return(inputSig.path_to_sig(file))
+	if dyadic_level:
+		return(inputSig.path_to_dyadic_sig(file,dyadic_level))
+	else:
+		return(inputSig.path_to_sig(file))
+	
 
 
-
-def get_input_X_y(inputSig,n_samples,start_row,n_processes=1):
+def get_input_X_y(inputSig,n_samples,start_row,n_processes=1,dyadic_level=None):
 	""" Return training input matrix X and output y corresponding to inputSig
 	for n_samples samples.
 
@@ -350,9 +429,14 @@ def get_input_X_y(inputSig,n_samples,start_row,n_processes=1):
 	n_processes: int
 		Number of parallel processes the signature computations are done with.
 
+	dyadic_level: int, default=None
+		If not None, the path is divided into 2^dyadic_level subpaths and
+		signatures are computed on each subpath. Otherwise signatures are
+		computed on the whole path.
+
 	Returns
 	-------
-	X: array, shape (n_samples, siglength)
+	X: array, shape (n_samples, p)
 		Array with samples in rows and signature coefficients in columns.
 
 	y: array, shape (n_samples,1)
@@ -360,7 +444,8 @@ def get_input_X_y(inputSig,n_samples,start_row,n_processes=1):
 	"""
 	df,y=inputSig.get_inputs(n_samples=n_samples,start_row=start_row)
 	pool=Pool(processes=n_processes)
-	data_map=partial(unwrap_path_to_sig,inputSig=inputSig)
+	data_map=partial(
+		unwrap_path_to_sig,inputSig=inputSig,dyadic_level=dyadic_level)
 	df['signature']=pool.map(data_map,df['file'])
 	X= np.stack(df['signature'], 0)
 	y=inputSig.word_encoder.transform(df['Class'])
