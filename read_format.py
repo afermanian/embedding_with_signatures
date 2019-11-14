@@ -449,6 +449,7 @@ def get_input_X_y(inputSig,n_samples,start_row,n_processes=1,dyadic_level=None):
 	data_map=partial(
 		unwrap_path_to_sig,inputSig=inputSig,dyadic_level=dyadic_level)
 	df['signature']=pool.map(data_map,df['file'])
+	pool.close()
 	X= np.stack(df['signature'], 0)
 	y=inputSig.word_encoder.transform(df['Class'])
 	return(X,y)
