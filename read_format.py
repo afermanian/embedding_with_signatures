@@ -138,15 +138,14 @@ class InputSig:
 			df=pd.read_csv(
 				os.path.join(
 					data_dir,'MotionSense/motion_sense_shuffled_paths.csv'),
-				nrows=n_samples, skiprows=start_row,index_col=0)
+				nrows=n_samples, skiprows=start_row,index_col=0,header=0)
 			df.columns=['file','Class']
 
 		elif self.data=='urban_sound':
 			base_dir =os.path.join(data_dir,'urban-sound-classification/train')
 			df = pd.read_csv(
 				os.path.join(base_dir,'shuffled_train.csv'),nrows=n_samples,
-				skiprows=start_row)
-			df.columns=['ID','Class']
+				skiprows=start_row,header=0,index_col=0)
 			df['file'] = df['ID'].apply(lambda x: base_dir+'/Train/'+str(x)+
 				'.wav')
 

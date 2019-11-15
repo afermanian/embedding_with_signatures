@@ -1,8 +1,8 @@
 import pandas as pd
 import os
 
-data_dir='/volumes/fermanian_disk/Data/embedding' # path to data repository
-#data_dir='/users/home/fermanian/embedding/Quick-draw-signature'
+#data_dir='/volumes/fermanian_disk/Data/embedding' # path to data repository
+data_dir='/users/home/fermanian/embedding/Quick-draw-signature'
 
 
 def save_motion_sense_shuffled_paths_df():
