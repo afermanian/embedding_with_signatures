@@ -143,8 +143,8 @@ class InputSig:
 
 		elif self.data=='urban_sound':
 			base_dir =os.path.join(data_dir,'urban-sound-classification/train')
-			df = pd.read_csv(os.path.join(base_dir,'train.csv'),nrows=n_samples,
-
+			df = pd.read_csv(
+				os.path.join(base_dir,'shuffled_train.csv'),nrows=n_samples,
 				skiprows=start_row)
 			df.columns=['ID','Class']
 			df['file'] = df['ID'].apply(lambda x: base_dir+'/Train/'+str(x)+

@@ -14,13 +14,24 @@ data_dir in read_format.py.
 The code enables to test the combination signature + machine learning algorithm
 with various embedding, truncation order of signatures and algorithms.
 
-## Environment
+## First steps
+
+### Packages
 
 All packages needed to run the scripts are listed in requirements.txt. You can
 install them with
 
 ```python
 pip install -r requirements.txt
+```
+
+### Data preprocessing
+
+Before doing some experiments execute preprocessing.py to shuffle the
+datasets Motion Sense and Urban Sound:
+
+```bash
+python preprocessing.py
 ```
 
 ## Experiments
