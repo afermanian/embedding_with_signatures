@@ -133,19 +133,20 @@ class InputSig:
 		y: array, shape (n_samples,1)
 			Array of labels from word_encoder corresponding to each row of df.
 		"""
-		
+
 		if self.data=='motion_sense':
 			df=pd.read_csv(
 				os.path.join(
 					data_dir,'MotionSense/motion_sense_shuffled_paths.csv'),
-				nrows=n_samples, skiprows=start_row,index_col=0,header=0)
+				nrows=n_samples, skiprows=start_row,index_col=0)
 			df.columns=['file','Class']
 
 		elif self.data=='urban_sound':
 			base_dir =os.path.join(data_dir,'urban-sound-classification/train')
 			df = pd.read_csv(
 				os.path.join(base_dir,'shuffled_train.csv'),nrows=n_samples,
-				skiprows=start_row,header=0,index_col=0)
+				skiprows=start_row,index_col=0)
+			df.columns=['ID','Class']
 			df['file'] = df['ID'].apply(lambda x: base_dir+'/Train/'+str(x)+
 				'.wav')
 
@@ -162,6 +163,7 @@ class InputSig:
 			df = pd.concat(out_df_list)
 
 		print(df.head())
+
 		y=df['Class']
 		return(df,y)
 

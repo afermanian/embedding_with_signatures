@@ -44,7 +44,8 @@ def save_motion_sense_shuffled_paths_df():
 	df = df.sample(frac=1).reset_index(drop=True)
 	print(df.head())
 	print(df.shape)
-	df.to_csv(os.path.join(data_dir,'MotionSense/motion_sense_shuffled_paths.csv'))
+	df[['file','Class']].to_csv(
+		os.path.join(data_dir,'MotionSense/motion_sense_shuffled_paths.csv'))
 	return(df)
 
 def save_urban_sound_shuffled_paths():
