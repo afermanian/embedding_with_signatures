@@ -42,7 +42,7 @@ elif data=='quick_draw':
 	n_valid_samples=20*340
 	n_test_samples=20*340
 	order_dict={
-		'0':np.arange(10)+1,'1':np.arange(7)+1,'2':np.arange(6)+1,
+		'0':np.arange(8)+1,'1':np.arange(7)+1,'2':np.arange(6)+1,
 		'3':np.arange(5)+1,'4':np.arange(5)+1,'5':np.arange(4)+1,
 		'6':np.arange(4)+1}
 

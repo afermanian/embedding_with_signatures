@@ -108,6 +108,8 @@ class LearnSig:
 		if params:
 			self.params=params
 
+		
+
 		print("Training data shape: ",train_X.shape)
 		if self.algo=='neural_network':
 			train_y_cat=to_categorical(train_y)
