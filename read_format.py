@@ -12,7 +12,6 @@ from functools import partial
 
 #data_dir='/volumes/fermanian_disk/Data/embedding' # path to data repository
 data_dir='/users/home/fermanian/embedding/Quick-draw-signature'
-#data_dir='/Users/fermanian/Documents/Thèse/Quick Draw challenge/Code Clean'
 
 
 def create_rectilinear(path):

@@ -60,7 +60,7 @@ class LearnSig:
 		if self.algo=='neural_network':
 			self.params={'lr':1,'batch_size':128,'epochs':200}
 		elif self.algo=='random_forest':
-			self.params={'n_trees':50}
+			self.params={'n_estimators':50}
 		elif self.algo=='xgboost':
 			self.params={
 				'objective':'multi:softmax','silent': 1,
@@ -144,7 +144,7 @@ class LearnSig:
 
 		elif self.algo=='random_forest':
 			self.model=RandomForestClassifier(
-				n_jobs=self.n_processes,n_estimators=self.params['n_trees'])
+				n_jobs=self.n_processes,n_estimators=self.params['n_estimators'])
 			self.model.fit(train_X,train_y)
 
 		else:
