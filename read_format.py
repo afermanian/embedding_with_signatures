@@ -12,6 +12,7 @@ from functools import partial
 
 #data_dir='/volumes/fermanian_disk/Data/embedding' # path to data repository
 data_dir='/users/home/fermanian/embedding/Quick-draw-signature'
+#data_dir='/Users/fermanian/Documents/Thèse/Quick Draw challenge/Code Clean'
 
 
 def create_rectilinear(path):
@@ -113,7 +114,7 @@ class InputSig:
 		else:
 			self.fit_word_encoder()
 
-	def get_inputs(self,n_samples=10*340,start_row=0):
+	def get_inputs(self,n_samples,start_row=0):
 		""" Returns a data frame and a vector of labels for each dataset.
 
 		Parameters
@@ -152,6 +153,7 @@ class InputSig:
 
 		elif self.data=='quick_draw':
 			n_samples=n_samples//340
+			start_row=start_row//340
 			all_train_paths = glob(
 				os.path.join(data_dir,'input','train_simplified','*.csv'))
 			out_df_list = []
@@ -163,6 +165,7 @@ class InputSig:
 			df = pd.concat(out_df_list)
 
 		print(df.head())
+		print(df.shape)
 
 		y=df['Class']
 		return(df,y)
@@ -185,7 +188,7 @@ class InputSig:
 			self.word_encoder.classes_ = np.load(
 				'classes_'+self.data+'.npy',allow_pickle=True)
 		else:
-			df,y=self.get_inputs(n_samples=n_samples)
+			df,y=self.get_inputs(n_samples)
 			self.word_encoder.fit(y)
 			print(
 				"Word encoder fitted with classes: ", 
@@ -292,7 +295,6 @@ class InputSig:
 			Array containing signature coefficients computed on the embedded
 			path of the sample corresponding to file.
 		"""
-
 		path=self.data_to_path(file)
 		sig=isig.sig(path,self.order)
 		return(sig)
@@ -359,7 +361,7 @@ class InputSig:
 			d=2
 
 		if self.embedding=='lead_lag':
-			return(self.ll*d +1)
+			return((self.ll+1)*d +1)
 		elif self.embedding=='raw' or self.embedding=='rectilinear':
 			return(d)
 		else:
@@ -445,7 +447,7 @@ def get_input_X_y(inputSig,n_samples,start_row,n_processes=1,dyadic_level=None):
 	y: array, shape (n_samples,1)
 		Array of sample labels.
 	"""
-	df,y=inputSig.get_inputs(n_samples=n_samples,start_row=start_row)
+	df,y=inputSig.get_inputs(n_samples,start_row=start_row)
 	pool=Pool(processes=n_processes)
 	data_map=partial(
 		unwrap_path_to_sig,inputSig=inputSig,dyadic_level=dyadic_level)

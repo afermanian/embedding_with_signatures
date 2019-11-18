@@ -36,36 +36,37 @@ elif data=='quick_draw':
 
 
 start_row=0
-nb_processes=2
+n_processes=32
 
 
 # Load input data 
 inputSig=InputSig(data,embedding,order,ll=ll)
 
 train_X,train_y=get_input_X_y(
-	inputSig,n_train_samples,start_row,n_processes=nb_processes)
+	inputSig,n_train_samples,start_row,n_processes=n_processes)
 max_train_X=np.amax(np.absolute(train_X),axis=0)
 train_X=train_X/max_train_X
 
 valid_X,valid_y=get_input_X_y(
-	inputSig,n_valid_samples,start_row+n_train_samples,n_processes=nb_processes)
+	inputSig,n_valid_samples,start_row+n_train_samples,n_processes=n_processes)
 valid_X=valid_X/max_train_X
 
 test_X,test_y=get_input_X_y(
 	inputSig,n_test_samples,start_row+n_train_samples+n_valid_samples,
-	n_processes=nb_processes)
+	n_processes=n_processes)
 valid_X=valid_X/max_train_X
 test_X=test_X/max_train_X
 
 # Fit and evaluate algorithm
 
-# Train with custom parameters, for example for Urban Sound best random forest
-#custom_params={'n_estimators':460,'max_depth':30,'max_features':500}
-#learnSig.train(
-#	train_X,train_y,valid_X=valid_X,valid_y=valid_y,params=custom_params)
-
 learnSig=LearnSig(algo,inputSig,n_processes=n_processes)
-learnSig.train(train_X,train_y,valid_X=valid_X,valid_y=valid_y)
+
+# Train with custom parameters, for example for Urban Sound best random forest
+custom_params={'n_estimators':460,'max_depth':30,'max_features':500}
+learnSig.train(
+	train_X,train_y,valid_X=valid_X,valid_y=valid_y,params=custom_params)
+
+#learnSig.train(train_X,train_y,valid_X=valid_X,valid_y=valid_y)
 test_results=learnSig.evaluate(test_X,test_y,metrics=['accuracy','f1_score'])
 print(test_results)
 
