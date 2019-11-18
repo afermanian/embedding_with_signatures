@@ -75,7 +75,7 @@ for embedding in embedding_list:
 
 		for algo in algo_list:
 			# Fit and evaluate algorithm
-			learnSig=LearnSig(algo,inputSig)
+			learnSig=LearnSig(algo,inputSig,n_processes=n_processes)
 			learnSig.train(train_X,train_y,valid_X=valid_X,valid_y=valid_y)
 			test_results=learnSig.evaluate(test_X,test_y,metrics=['accuracy'])
 			print(test_results)

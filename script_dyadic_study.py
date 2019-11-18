@@ -18,9 +18,9 @@ start_time=time.time()
 data=str(sys.argv[1])
 embedding='time'
 algo='neural_network'
-dyadic_level_list=np.arange(4)
+dyadic_level_list=np.arange(5)
 start_row=0
-n_processes=32
+n_processes=2
 
 if data=='motion_sense':
 	n_test_samples=30
@@ -73,7 +73,7 @@ for dyadic_level in dyadic_level_list:
 		test_X=test_X/max_train_X
 
 		# Fit and evaluate algorithm
-		learnSig=LearnSig(algo,inputSig)
+		learnSig=LearnSig(algo,inputSig,n_processes=n_processes)
 		learnSig.train(train_X,train_y,valid_X=valid_X,valid_y=valid_y)
 		test_results=learnSig.evaluate(test_X,test_y,metrics=['accuracy'])
 		print(test_results)

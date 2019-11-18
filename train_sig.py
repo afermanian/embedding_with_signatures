@@ -135,7 +135,8 @@ class LearnSig:
 			self.model.fit(
 				train_X, train_y_cat,validation_data = (valid_X, valid_y_cat), 
 				batch_size = self.params['batch_size'],
-				epochs = self.params['epochs'],callbacks=callbacks_list)
+				epochs = self.params['epochs'],callbacks=callbacks_list,
+				workers=self.n_processes)
 
 		elif self.algo=='nearest_neighbors':
 			self.model=KNeighborsClassifier(n_jobs=self.n_processes)
