@@ -5,7 +5,7 @@ from read_format import InputSig,get_input_X_y
 
 order=6
 ll=1
-n_processes=2
+n_processes=32
 
 n_train_samples=1792*340
 n_valid_samples=256*340

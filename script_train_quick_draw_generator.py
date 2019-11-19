@@ -2,6 +2,7 @@ import os
 import time
 from keras.callbacks import ModelCheckpoint,TensorBoard
 from glob import glob
+import pandas as pd
 
 from quick_draw_generator import QuickDrawGenerator
 from neural_network_models import dense_model_2
@@ -15,17 +16,18 @@ order=6
 ll=1
 n_processes=32
 batch_size=128
-epochs=200
+epochs=300
 initial_epoch=0
 
 n_train_samples=1792*340
 n_valid_samples=256*340
 n_test_samples=256*340
 n_max_train_samples=35840*340
+
 first_row=0
 
-n_tot=n_max_train_samples+n_test_samples+n_valid_samples
-print('Total number of samples: ',n_tot)
+n_tot=(n_max_train_samples+n_test_samples+n_valid_samples)//340
+print('Total number of samples per class : ',n_tot)
 
 
 model_name= "quick_draw_dense_model_2_lead_lag_embedding_lag_%i_order_%i_%s" % (
@@ -44,11 +46,11 @@ callbacks_list = [checkpoint,tensorBoard]
 
 # Get input data
 
-all_train_paths=glob(os.path.join(data_dir,'train_simplified', '*.csv'))
+all_train_paths=glob(os.path.join(data_dir,'input','train_simplified', '*.csv'))
 cache={
-	i:pd.read_csv(all_train_paths_2[i],
+	i:pd.read_csv(all_train_paths[i],
 	names=['countrycode', 'file', 'key_id', 'recognized', 'timestamp', 'Class'],
-	nrows=nrows_tot,header=0) for i in range(len(all_train_paths))}
+	nrows=n_tot,header=0) for i in range(len(all_train_paths))}
 train_generator=QuickDrawGenerator(
 	n_train_samples,n_max_train_samples,batch_size,first_row,cache,order=order)
 valid_generator=QuickDrawGenerator(
