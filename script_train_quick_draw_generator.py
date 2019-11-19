@@ -12,6 +12,7 @@ data_dir='/users/home/fermanian/embedding/Quick-draw-signature'
 
 
 
+# Hyperparameters
 order=6
 ll=1
 n_processes=32
@@ -45,7 +46,6 @@ tensorBoard=TensorBoard(log_dir=log_path)
 callbacks_list = [checkpoint,tensorBoard]
 
 # Get input data
-
 all_train_paths=glob(os.path.join(data_dir,'input','train_simplified', '*.csv'))
 cache={
 	i:pd.read_csv(all_train_paths[i],
@@ -61,7 +61,6 @@ test_generator=QuickDrawGenerator(
 	first_row+n_max_train_samples+n_valid_samples,cache,order=order)
 
 # Get model
-
 n_features=train_generator.inputSig.get_sig_dimension()
 n_classes=len(train_generator.word_encoder.classes_)
 
@@ -86,8 +85,8 @@ print("predicting")
 model_results = model.evaluate_generator(test_generator)
 print(model_results)
 
-file = open(model_param_path,"w") 
- 
+# Save results
+file = open(model_param_path,"w")
 file.write("Signature order: %i \n" % (order)) 
 file.write("Epochs: %i \n" % (epochs)) 
 file.write("Batch size: %i \n" %(batch_size))

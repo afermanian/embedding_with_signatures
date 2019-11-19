@@ -73,6 +73,9 @@ class QuickDrawGenerator(Sequence):
 		self.on_epoch_end()
 
 	def __len__(self) :
+		""" Returns the number of steps made in each epoch, that is the number
+		of batches.
+		"""
 		return (np.ceil(self.n_samples*340/float(self.batch_size))).astype(np.int)
 
 
