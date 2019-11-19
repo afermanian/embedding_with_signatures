@@ -1,18 +1,22 @@
+Work in progress !
+
 # Embedding and learning with signatures
 
-This is the code accompanying the article "Embedding and learning with 
-signature". It is based on three recent datasets, called Quick, Draw!, Motion
-Sense and Urban Sound. They can be found at the following addresses:
+This is the code accompanying the article [1]. It is based on three recent
+datasets, called Quick, Draw!, MotionSense and Urban Sound. They can be found at
+the following links:
 
 * Quick, Draw!: https://www.kaggle.com/c/quickdraw-doodle-recognition/data
 * Motion Sense: https://www.kaggle.com/malekzadeh/motionsense-dataset
 * Urban Sound: http://urbansounddataset.weebly.com
 
-The path to the directory where data is saved must be filled in the variable
-data_dir in read_format.py.
+The path to the directory where these datasets are saved must be filled in the
+variable data_dir in read_format.py, preprocessing.py and
+script_train_quick_draw_generator.py.
 
 The code enables to test the combination signature + machine learning algorithm
-with various embedding, truncation order of signatures and algorithms.
+with various embedding, truncation order of signatures and algorithms. It also
+reproduces all results presented in the article [1].
 
 ## First steps
 
@@ -68,14 +72,14 @@ order 2.
 ### Comparison of embeddings
 
 This script script_comparison_all_embeddings.py can be launched to get all 
-results of embeddings comparison on Figures ?????. You just need to choose a
-dataset launch
+results of embeddings comparison represented in Figures 11, 12 and 13 in [1].
+Choose a dataset and launch the script. For example,
 
 ```bash
 python script_comparison_all_embeddings quick_draw
 ```
 
-to get a csv files with all results for the Quick, Draw! dataset. Its columns
+outputs a csv files with all results for the Quick, Draw! dataset. Its columns
 are ['accuracy','embedding','algo','order','n_features]. Similarly it can be
 launched with motion_sense or urban_sound as argument to get the results of the
 other dataset.
@@ -84,7 +88,7 @@ other dataset.
 ### Comparison of dyadic partitions
 
 The script script_dyadic_study.py launches the experiments necessary to compare
-dyadic partitions (see Figure ????). It can be launched with as argument the
+dyadic partitions (see Figure 14). It can be launched with as argument the
 desired dataset (quick_draw, motion_sense or urban_sound). For example, to get
 the results for Quick, Draw! :
 
@@ -98,7 +102,7 @@ It outputs a csv file with all the results, with columns
 ### Lag selection
 
 Similarly, the script script_ll_selection.py launches the experiments necessary
-to compare different lags (see Figure ???). It can be launched with as argument 
+to compare different lags (see Figure 15). It can be launched with as argument 
 the desired dataset (quick_draw, motion_sense or urban_sound). For example, to
 get the results for Quick, Draw! :
 
@@ -108,6 +112,39 @@ python script_ll_selection.py quick_draw
 
 It outputs a csv file with all the results, with columns
 ['accuracy','embedding','algo','order','ll','n_features].
+
+### Performance of the signature
+
+* For Motion Sense, a F1 score of 93.5 is obtained with an XGBoost classifier, a
+lead lag embedding and a signature truncated at order 3. It is obtained by
+running:
+
+```bash
+python script_train_sig.py motion_sense lead_lag xgboost 3 1
+```
+
+* For Urban Sound, the hyperparameters of a random forest have been tuned with a
+randomized grid search. The best params are stored in the variable custom_params
+in script_train. Uncomment the corresponding lines and train a random forest
+with these parameters by launching:
+
+```bash
+python script_train_sig.py urban_sound lead_lag random_forest 5 5
+```
+This yields an accuracy of 70.2
+
+* For Quick, Draw!, it is necessary to train a neural network with more data,
+which is handled by a data generator defined in quic_draw_generator.py. Then,
+script_train_sig_generator.py trains the model. Be aware that this script
+demands more computational capacities. Before doing so, some preprocessing is
+necessary to save a normalization vector. Run the script
+preprocessing_generator_quic_draw.py to do so. It will save this vector as a
+.npy array.
+
+## References
+
+[1]: Embedding and learning with signatures.
+
 
 
 
