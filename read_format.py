@@ -455,29 +455,5 @@ def get_input_X_y(inputSig,n_samples,start_row,n_processes=1,dyadic_level=None):
 	y=inputSig.word_encoder.transform(df['Class'])
 	return(X,y)
 	
-def get_quick_draw_submission_input_X(inputSig,n_processes=1):
-	"""Read quick draw submission data and output the signature matrix.
-	
-	Parameters
-	----------
-	inputSig: instance of the class InputSig
-		The object containing information about which data we are working
-		on and with which embedding.
-
-	Returns
-	-------
-	X: array, shape (n_samples, p)
-		Array with samples in rows and signature coefficients in columns.
-	"""
-	df=pd.read_csv(os.path.join(data_dir,'input', 'test_simplified.csv'))
-	df.columns=['key_id','countrycode','file']
-	pool=Pool(processes=n_processes)
-	data_map=partial(
-		unwrap_path_to_sig,inputSig=inputSig)
-	df['signature']=pool.map(data_map,df['file'])
-	pool.close()
-	X= np.stack(df['signature'], 0)
-	return(df,X)
-
 
 
