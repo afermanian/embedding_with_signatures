@@ -135,11 +135,10 @@ top_3_pred =np.vstack([inputSig.word_encoder.classes_[np.argsort(-1*c_pred)[:3]]
 print(top_3_pred.shape)
 
 test_labels=inputSig.word_encoder.inverse_transform(test_y)
+print(top_3_pred[0,:],test_labels[0])
 
 mapk=mapk(test_labels,top_3_pred)
-top_3=top_3_accuracy(test_labels,top_3_pred)
 print("MAPK at 3: ",mapk)
-print("Top 3 accuract: ",top_3)
 
 # Save results
 file = open(model_param_path,"w")
@@ -152,7 +151,6 @@ file.write("Number of validation samples: %i \n" % (n_valid_samples))
 file.write("Number of test samples: %i \n" % (n_test_samples))
 file.write("Number of max training samples: %i \n" % (n_max_train_samples))
 file.write("First row of training data: %i \n" % (first_row))
-file.write("Number of features: %s \n" % (n_features,))
 file.write("Lag %s \n" % (ll,))
 file.write("Model chosen: \n")
 file.write("Model name:%s \n" %(model.name,))
