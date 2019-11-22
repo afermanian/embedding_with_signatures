@@ -17,6 +17,8 @@ from keras.models import load_model
 from keras.metrics import top_k_categorical_accuracy
 def top_3_accuracy(x,y): return top_k_categorical_accuracy(x,y,3)
 
+from sklearn.metrics import accuracy_score
+
 
 #data_dir='/volumes/fermanian_disk/Data/embedding' # path to data repository
 data_dir='/users/home/fermanian/embedding/Quick-draw-signature'
@@ -131,15 +133,21 @@ model=load_model(trained_path,custom_objects={'top_3_accuracy':top_3_accuracy})
 
 print("Predict")
 pred_y_cat=model.predict(test_X,batch_size=batch_size)
+print(pred_y_cat[0,:10])
 top_3_pred =np.vstack([inputSig.word_encoder.classes_[np.argsort(-1*c_pred)[:3]] for c_pred in pred_y_cat])
 print(top_3_pred.shape)
 
 test_labels=inputSig.word_encoder.inverse_transform(test_y)
-print(top_3_pred[0,:],test_labels[0])
-print(test_labels[0] in top_3_pred[0,:])
+print(top_3_pred[:2,:],test_labels[:2])
+print(mapk(top_3_pred[:2,:],test_labels[:2]))
 
 mapk=mapk(test_labels,top_3_pred)
 print("MAPK at 3: ",mapk)
+
+best_pred=top_3_pred[:,0]
+print(best_pred[:2])
+acc=accuracy_score(test_labels,best_pred)
+print("Accuracy: ",acc)
 
 # Save results
 file = open(model_param_path,"w")
@@ -157,7 +165,7 @@ file.write("Model chosen: \n")
 file.write("Model name:%s \n" %(model.name,))
 model.summary(print_fn=lambda x: file.write(x + '\n'))
 file.write("Mapk at 3: %s" % (mapk))
-file.write("Top 3 accuracy: %s" % (top_3))
+file.write("Accuracy: %s" % (acc))
 file.close() 
 
 
