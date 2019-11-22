@@ -80,7 +80,6 @@ model.fit_generator(generator=train_generator,
                    max_queue_size=128)
 
 
-print("--- %s seconds ---" % (time.time() - start_time))
 print("predicting")
 model_results = model.evaluate_generator(test_generator)
 print(model_results)
@@ -101,7 +100,6 @@ file.write("Lag %s \n" % (ll,))
 file.write("Model chosen: \n")
 file.write("Model name:%s \n" %(model.name,))
 model.summary(print_fn=lambda x: file.write(x + '\n'))
-file.write("Time %s \n" % (time.time() - start_time))
 file.write("Model_results: %s" %(model_results))
 file.close() 
 

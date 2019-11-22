@@ -64,7 +64,7 @@ learnSig=LearnSig(algo,inputSig,n_processes=n_processes)
 # Train with custom parameters, for example for Urban Sound best random forest
 #custom_params={'n_estimators':460,'max_depth':30,'max_features':500}
 #learnSig.train(
-	train_X,train_y,valid_X=valid_X,valid_y=valid_y,params=custom_params)
+#	train_X,train_y,valid_X=valid_X,valid_y=valid_y,params=custom_params)
 
 learnSig.train(train_X,train_y,valid_X=valid_X,valid_y=valid_y)
 test_results=learnSig.evaluate(test_X,test_y,metrics=['accuracy','f1_score'])
