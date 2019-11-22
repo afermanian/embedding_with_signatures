@@ -477,7 +477,7 @@ def get_quick_draw_submission_input_X(inputSig,n_processes=1):
 	df['signature']=pool.map(data_map,df['file'])
 	pool.close()
 	X= np.stack(df['signature'], 0)
-	return(X)
+	return(df,X)
 
 
 

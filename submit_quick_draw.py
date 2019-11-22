@@ -16,14 +16,14 @@ submission_path=os.path.join('results',initial_model_path+'_submission.csv')
 batch_size=128
 order=6
 ll=1
-n_processes=2
+n_processes=32
 
 model=load_model(trained_path,custom_objects={'top_3_accuracy':top_3_accuracy})
 
 
 # Get data
 inputSig=InputSig('quick_draw','lead_lag',order,ll=ll)
-test_X=get_quick_draw_submission_input_X(inputSig,n_processes=n_processes)
+test_df,test_X=get_quick_draw_submission_input_X(inputSig,n_processes=n_processes)
 norm_vec=np.load('norm_vec_quick_draw_generator.npy')
 test_X=test_X/norm_vec
 
