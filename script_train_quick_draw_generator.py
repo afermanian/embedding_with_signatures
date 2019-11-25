@@ -32,10 +32,11 @@ batch_size=128
 epochs=300
 initial_epoch=0
 
+
 n_train_samples=1792*340
 n_valid_samples=256*340
 n_test_samples=256*340
-n_max_train_samples=35840*340
+_max_train_samples=35840*340
 
 first_row=0
 
@@ -138,14 +139,13 @@ top_3_pred =np.vstack([inputSig.word_encoder.classes_[np.argsort(-1*c_pred)[:3]]
 print(top_3_pred.shape)
 
 test_labels=inputSig.word_encoder.inverse_transform(test_y)
-print(top_3_pred[:2,:],test_labels[:2])
-print(mapk(top_3_pred[:2,:],test_labels[:2]))
 
+print(test_labels.shape)
+print(top_3_pred.shape)
 mapk=mapk(test_labels,top_3_pred)
 print("MAPK at 3: ",mapk)
 
 best_pred=top_3_pred[:,0]
-print(best_pred[:2])
 acc=accuracy_score(test_labels,best_pred)
 print("Accuracy: ",acc)
 
