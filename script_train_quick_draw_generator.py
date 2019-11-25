@@ -27,7 +27,7 @@ data_dir='/users/home/fermanian/embedding/Quick-draw-signature'
 # Hyperparameters
 order=6
 ll=1
-n_processes=32
+n_processes=3
 batch_size=128
 epochs=300
 initial_epoch=0
@@ -36,7 +36,7 @@ initial_epoch=0
 n_train_samples=1792*340
 n_valid_samples=256*340
 n_test_samples=256*340
-_max_train_samples=35840*340
+n_max_train_samples=35840*340
 
 first_row=0
 
@@ -44,57 +44,53 @@ n_tot=(n_max_train_samples+n_test_samples+n_valid_samples)//340
 print('Total number of samples per class : ',n_tot)
 
 
-# model_name= "quick_draw_dense_model_2_lead_lag_embedding_lag_%i_order_%i_%s" % (
-# 	ll,order,time.strftime("%m%d-%H%M%S"))
+model_name= "quick_draw_dense_model_2_lead_lag_embedding_lag_%i_order_%i_%s" % (
+	ll,order,time.strftime("%m%d-%H%M%S"))
 
-# model_path=os.path.join('results',model_name+"_{epoch:02d}-{val_loss:.2f}.h5")
-# log_path=os.path.join('./logs',model_name)
-# model_param_path=os.path.join('results',model_name+".txt")
-# print(model_param_path)
+model_path=os.path.join('results',model_name+"_{epoch:02d}-{val_loss:.2f}.h5")
+log_path=os.path.join('./logs',model_name)
+model_param_path=os.path.join('results',model_name+".txt")
+print(model_param_path)
 
-# # Define callbacks
-# checkpoint = ModelCheckpoint(model_path, monitor='val_loss', verbose=1,
-# 	save_best_only=False, mode='min')
-# tensorBoard=TensorBoard(log_dir=log_path)
-# callbacks_list = [checkpoint,tensorBoard]
+# Define callbacks
+checkpoint = ModelCheckpoint(model_path, monitor='val_loss', verbose=1,
+	save_best_only=False, mode='min')
+tensorBoard=TensorBoard(log_dir=log_path)
+callbacks_list = [checkpoint,tensorBoard]
 
-# # Get input data
-# all_train_paths=glob(os.path.join(data_dir,'input','train_simplified', '*.csv'))
-# cache={
-# 	i:pd.read_csv(all_train_paths[i],
-# 	names=['countrycode', 'file', 'key_id', 'recognized', 'timestamp', 'Class'],
-# 	nrows=n_tot,header=0) for i in range(len(all_train_paths))}
-# train_generator=QuickDrawGenerator(
-# 	n_train_samples,n_max_train_samples,batch_size,first_row,cache,order=order)
-# valid_generator=QuickDrawGenerator(
-# 	n_valid_samples,n_valid_samples,batch_size,first_row+n_max_train_samples,
-# 	cache,order=order)
-# test_generator=QuickDrawGenerator(
-# 	n_test_samples,n_test_samples,batch_size,
-# 	first_row+n_max_train_samples+n_valid_samples,cache,order=order)
+# Get input data
+all_train_paths=glob(os.path.join(data_dir,'input','train_simplified', '*.csv'))
+cache={
+	i:pd.read_csv(all_train_paths[i],
+	names=['countrycode', 'file', 'key_id', 'recognized', 'timestamp', 'Class'],
+	nrows=n_tot,header=0) for i in range(len(all_train_paths))}
+train_generator=QuickDrawGenerator(
+	n_train_samples,n_max_train_samples,batch_size,first_row,cache,order=order)
+valid_generator=QuickDrawGenerator(
+	n_valid_samples,n_valid_samples,batch_size,first_row+n_max_train_samples,
+	cache,order=order)
 
-# # Get model
-# n_features=train_generator.inputSig.get_sig_dimension()
-# n_classes=len(train_generator.word_encoder.classes_)
+# Get model
+n_features=train_generator.inputSig.get_sig_dimension()
+n_classes=len(train_generator.word_encoder.classes_)
 
-# model=dense_model_2(n_features,n_classes)
-# print(model.name)
+model=dense_model_2(n_features,n_classes)
+print(model.name)
 
-# print("fitting")
-# # Fit model
+print("fitting")
+# Fit model
 
-# model.fit_generator(generator=train_generator,
-#                    epochs = epochs,
-#                    verbose = 1,
-#                    validation_data = valid_generator,
-#                    callbacks=callbacks_list,
-#                    use_multiprocessing=True,
-#                    workers=n_processes,
-#                    max_queue_size=128)
+model.fit_generator(generator=train_generator,
+                   epochs = epochs,
+                   verbose = 1,
+                   validation_data = valid_generator,
+                   callbacks=callbacks_list,
+                   use_multiprocessing=True,
+                   workers=n_processes,
+                   max_queue_size=128)
 
-# print("predicting")
-# model_results = model.evaluate_generator(test_generator)
-# print(model_results)
+print("predicting on a test set")
+
 
 
 def mapk(y_true,y_pred,k=3):
@@ -117,9 +113,6 @@ def mapk(y_true,y_pred,k=3):
 				continue_var=False
 	return(score/n)
 
-initial_model_path=str(sys.argv[1])
-trained_path=os.path.join('results',initial_model_path)
-model_param_path=os.path.join('results',initial_model_path+".txt")
 
 print("Get input sig ")
 inputSig=InputSig('quick_draw','lead_lag',6,ll=1)
@@ -130,13 +123,10 @@ test_X,test_y=get_input_X_y(
 norm_vec=np.load('norm_vec_quick_draw_generator.npy')
 test_X=test_X/norm_vec
 
-model=load_model(trained_path,custom_objects={'top_3_accuracy':top_3_accuracy})
 
 print("Predict")
 pred_y_cat=model.predict(test_X,batch_size=batch_size)
-print(pred_y_cat[0,:10])
 top_3_pred =np.vstack([inputSig.word_encoder.classes_[np.argsort(-1*c_pred)[:3]] for c_pred in pred_y_cat])
-print(top_3_pred.shape)
 
 test_labels=inputSig.word_encoder.inverse_transform(test_y)
 
@@ -164,7 +154,7 @@ file.write("Lag %s \n" % (ll,))
 file.write("Model chosen: \n")
 file.write("Model name:%s \n" %(model.name,))
 model.summary(print_fn=lambda x: file.write(x + '\n'))
-file.write("Mapk at 3: %s" % (mapk))
+file.write("Mapk at 3: %s \n" % (mapk))
 file.write("Accuracy: %s" % (acc))
 file.close() 
 
