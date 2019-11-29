@@ -1,5 +1,3 @@
-Work in progress !
-
 # Embedding and learning with signatures
 
 This is the code accompanying the article [1]. It is based on three recent
@@ -143,7 +141,7 @@ preprocessing_generator_quic_draw.py to do so. It will save this vector as a
 
 ## References
 
-[1]: Embedding and learning with signatures.
+[1]: Fermanian, A. (2019) Embedding and learning with signatures 
 
 
 
