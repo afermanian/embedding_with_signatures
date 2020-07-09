@@ -14,6 +14,7 @@ start_time=time.time()
 
 data=str(sys.argv[1])
 algo_list=['neural_network','nearest_neighbors','random_forest','xgboost']
+metrics=['accuracy','f1_score']
 
 ll=1
 start_row=0
@@ -48,6 +49,19 @@ elif data=='quick_draw':
 		'rectilinear':np.arange(12)+1,'stroke_1':np.arange(8)+1,
 		'stroke_2':np.arange(8)+1,'stroke_3':np.arange(8)+1}
 
+elif data=='arma':
+	n_train_samples=1000
+	n_valid_samples=1000
+	n_test_samples=1000
+	arma_params={'ar':[1,-.5],'ma':None,'length':100,'noise_std':1}
+	metrics=['error_l2']
+	embedding_list=['time','raw','lead_lag']
+	algo_list=['linear_regression']
+	order_dict={
+		'raw':np.array([2,6,14,30,62,126]),'time':np.arange(12)+1,
+		'lead_lag':np.arange(8)+1}
+
+
 results_df=pd.DataFrame(
 	{'accuracy':[],'embedding':[],'algo':[],'order':[],'n_features':[]})
 
@@ -55,7 +69,7 @@ results_df=pd.DataFrame(
 # Load input data 
 for embedding in embedding_list:
 	for order in order_dict[embedding]:
-		inputSig=InputSig(data,embedding,order,ll=ll)
+		inputSig=InputSig(data,embedding,order,ll=ll,arma_params=arma_params)
 
 		train_X,train_y=get_input_X_y(
 			inputSig,n_train_samples,start_row,n_processes=n_processes)
@@ -77,12 +91,12 @@ for embedding in embedding_list:
 			# Fit and evaluate algorithm
 			learnSig=LearnSig(algo,inputSig,n_processes=n_processes)
 			learnSig.train(train_X,train_y,valid_X=valid_X,valid_y=valid_y)
-			test_results=learnSig.evaluate(test_X,test_y,metrics=['accuracy'])
+			test_results=learnSig.evaluate(test_X,test_y,metrics=metrics)
 			print(test_results)
 
 			results_df=results_df.append(
 				{'accuracy':test_results['accuracy'],'embedding':embedding,
-				'algo':algo,'order':order,'n_features':train_X.shape[1]},
+				'algo':algo,'order':order,'n_features':train_X.shape[1],'error_l2':test_results['error_l2']},
 				ignore_index=True)
 			print(results_df)
 

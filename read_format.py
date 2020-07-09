@@ -8,10 +8,12 @@ from ast import literal_eval
 from glob import glob
 from multiprocessing import Pool
 from functools import partial
+from statsmodels.tsa.arima_process import ArmaProcess
 
+import matplotlib.pyplot as plt
 
-#data_dir='/volumes/fermanian_disk/Data/embedding' # path to data repository
-data_dir='/users/home/fermanian/embedding/Quick-draw-signature'
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+data_dir=ROOT_DIR # path to data repository
 
 
 def create_rectilinear(path):
@@ -100,25 +102,26 @@ class InputSig:
 		Stores the classes of the dataset chosen.
 	"""
 
-	def __init__(self,data,embedding,order,ll=None):
+	def __init__(self,data,embedding,order,ll=None,arma_params=None):
 		self.data=data
 		self.embedding=embedding
 		self.order=order
 
 		self.word_encoder=LabelEncoder()
 		self.ll=ll
+		self.arma_params=arma_params
 
 		if self.data=='quick_draw':
 			self.fit_word_encoder(n_samples=10*340)
-		else:
+		elif self.data!='arma':
 			self.fit_word_encoder()
 
-	def get_inputs(self,n_samples,start_row=0):
+	def get_inputs(self,n_samples,start_row=0,plot=False):
 		""" Returns a data frame and a vector of labels for each dataset.
 
 		Parameters
 		----------
-		n_samples: int, default=10
+		n_samples: int
 			Number of samples to output.
 
 		start_row: int, default=0
@@ -140,6 +143,7 @@ class InputSig:
 					data_dir,'MotionSense/motion_sense_shuffled_paths.csv'),
 				nrows=n_samples, skiprows=start_row,index_col=0)
 			df.columns=['file','Class']
+			y=df['Class']
 
 		elif self.data=='urban_sound':
 			base_dir =os.path.join(data_dir,'urban-sound-classification/train')
@@ -149,6 +153,7 @@ class InputSig:
 			df.columns=['ID','Class']
 			df['file'] = df['ID'].apply(lambda x: base_dir+'/Train/'+str(x)+
 				'.wav')
+			y=df['Class']
 
 		elif self.data=='quick_draw':
 			n_samples=n_samples//340
@@ -162,11 +167,20 @@ class InputSig:
 				'timestamp', 'Class']
 				out_df_list += [c_df[['file', 'Class']]]
 			df = pd.concat(out_df_list)
+			y=df['Class']
 
-		print(df.head())
-		print(df.shape)
+		elif self.data=='arma':
+			arma=ArmaProcess(ar=self.arma_params['ar'],ma=self.arma_params['ma'],nobs=self.arma_params['length'])
+			X=arma.generate_sample(nsample=(n_samples,self.arma_params['length']+1), scale=self.arma_params['noise_std'],axis=1)
+			y=X[:,-1]
+			if plot:
+				plt.plot(np.transpose(X))
+				plt.show()
+			df=pd.DataFrame(X[:,:self.arma_params['length']])
+			#print(df.head())
+			df['file']=df.apply(lambda r: tuple(r), axis=1).apply(np.array)
+			df=df[['file']]
 
-		y=df['Class']
 		return(df,y)
 
 	def fit_word_encoder(self,n_samples=None):
@@ -228,6 +242,9 @@ class InputSig:
 			else:
 				signal=(signal[:,0]+signal[:,1])/2
 				signal=signal.reshape((signal.shape[0],1))
+
+		elif self.data=='arma':
+			signal=file.reshape((file.shape[0],1))
 		
 		elif self.data=='quick_draw':
 			stroke_vec = literal_eval(file) 
@@ -452,8 +469,16 @@ def get_input_X_y(inputSig,n_samples,start_row,n_processes=1,dyadic_level=None):
 	df['signature']=pool.map(data_map,df['file'])
 	pool.close()
 	X= np.stack(df['signature'], 0)
-	y=inputSig.word_encoder.transform(df['Class'])
+	if inputSig.data!='arma':
+		y=inputSig.word_encoder.transform(df['Class'])
 	return(X,y)
 	
+
+
+if __name__ == '__main__':
+	my_test=InputSig('arma','time',2,arma_params={'ar':[1,-.5],'ma':None,'length':100,'noise_std':1})
+	my_test.get_inputs(1,plot=True)
+	#X,y=get_input_X_y(my_test,2,0)
+
 
 

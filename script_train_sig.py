@@ -21,6 +21,8 @@ if len(sys.argv)==6:
 else:
 	ll=None
 
+metrics=['accuracy','f1_score']
+
 if data=='motion_sense':
 	n_test_samples=30
 	n_valid_samples=30
@@ -33,6 +35,16 @@ elif data=='quick_draw':
 	n_train_samples=200*340
 	n_valid_samples=20*340
 	n_test_samples=20*340
+elif data=='arma':
+	n_train_samples=100
+	n_valid_samples=100
+	n_test_samples=100
+
+if data=='arma':
+	arma_params={'ar':[1,-.9],'ma':None,'length':100,'noise_std':1}
+	metrics=['error_l2']
+else:
+	arma_params=None
 
 
 start_row=0
@@ -40,7 +52,7 @@ n_processes=32
 
 
 # Load input data 
-inputSig=InputSig(data,embedding,order,ll=ll)
+inputSig=InputSig(data,embedding,order,ll=ll,arma_params=arma_params)
 
 train_X,train_y=get_input_X_y(
 	inputSig,n_train_samples,start_row,n_processes=n_processes)
@@ -67,8 +79,7 @@ learnSig=LearnSig(algo,inputSig,n_processes=n_processes)
 #	train_X,train_y,valid_X=valid_X,valid_y=valid_y,params=custom_params)
 
 learnSig.train(train_X,train_y,valid_X=valid_X,valid_y=valid_y)
-test_results=learnSig.evaluate(test_X,test_y,metrics=['accuracy','f1_score'])
-print(test_results)
+test_results=learnSig.evaluate(test_X,test_y,metrics=metrics)
 
 # Write the results in a separate text file.
 results_path=os.path.join(results_dir,learnSig.model_name+".txt")

@@ -13,6 +13,7 @@ from sklearn.metrics import accuracy_score,f1_score
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LinearRegression
 
 import xgboost as xgb
 
@@ -147,6 +148,10 @@ class LearnSig:
 				n_jobs=self.n_processes,n_estimators=self.params['n_estimators'])
 			self.model.fit(train_X,train_y)
 
+		elif self.algo=='linear_regression':
+			self.model=LinearRegression(n_jobs=self.n_processes)
+			self.model.fit(train_X,train_y)
+
 		else:
 			dtrain=xgb.DMatrix(train_X,label=train_y)
 			dval=xgb.DMatrix(valid_X,label=valid_y)
@@ -194,9 +199,11 @@ class LearnSig:
 			test_results['accuracy']=accuracy_score(test_y,pred_y)
 		if 'f1_score' in metrics:
 			test_results['f1_score']=f1_score(test_y,pred_y,average='macro')
+		if 'error_l2' in metrics:
+			test_results['error_l2']=np.mean((test_y-pred_y)**2)
+			test_results['accuracy']=0
 		
 		return(test_results)
-
 
 
 
