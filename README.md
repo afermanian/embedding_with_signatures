@@ -52,7 +52,7 @@ will train a random forest on the dataset Quick, Draw! embedded with the time
 path and signature truncated at order 2. The possible arguments to the script
 are the following
 
-* dataset: quick_draw, motion_sense, urban_sound
+* dataset: quick_draw, motion_sense, urban_sound, arma
 * embedding: raw, time, lead_lag, rectilinear. If dataset=quick_draw, then
 stroke_1, stroke_2 and stroke_3 are also allowed.
 * algorithm: neural_network, random_forest, nearest_neighbors and xgboost.
@@ -70,7 +70,7 @@ order 2.
 ### Comparison of embeddings
 
 This script script_comparison_all_embeddings.py can be launched to get all 
-results of embeddings comparison represented in Figures 11, 12 and 13 in [1].
+results of embeddings comparison represented in Figures 9, 10, 11 and 15 in [1].
 Choose a dataset and launch the script. For example,
 
 ```bash
@@ -82,11 +82,24 @@ are ['accuracy','embedding','algo','order','n_features]. Similarly it can be
 launched with motion_sense or urban_sound as argument to get the results of the
 other dataset.
 
+### Autoregressive simulations
+
+The study of the influence of the lag for different AR(p) processes (Figure 16) may be obtained by running the following script:
+
+```bash
+python script_arma_ll_selection.py
+```
+
+The study of the influence of the truncation order and the sample size (Figures 17 and 18) may be obtained with
+
+```bash
+python script_arma_sample_size.py
+```
 
 ### Comparison of dyadic partitions
 
 The script script_dyadic_study.py launches the experiments necessary to compare
-dyadic partitions (see Figure 14). It can be launched with as argument the
+dyadic partitions (Figure 19). It can be launched with as argument the
 desired dataset (quick_draw, motion_sense or urban_sound). For example, to get
 the results for Quick, Draw! :
 
@@ -100,7 +113,7 @@ It outputs a csv file with all the results, with columns
 ### Lag selection
 
 Similarly, the script script_ll_selection.py launches the experiments necessary
-to compare different lags (see Figure 15). It can be launched with as argument 
+to compare different lags (see Figure 20). It can be launched with as argument 
 the desired dataset (quick_draw, motion_sense or urban_sound). For example, to
 get the results for Quick, Draw! :
 
@@ -110,6 +123,7 @@ python script_ll_selection.py quick_draw
 
 It outputs a csv file with all the results, with columns
 ['accuracy','embedding','algo','order','ll','n_features].
+
 
 ### Performance of the signature
 
@@ -141,7 +155,7 @@ preprocessing_generator_quic_draw.py to do so. It will save this vector as a
 
 ## References
 
-[1]: Fermanian, A. (2019) Embedding and learning with signatures 
+[1]: Fermanian, A. (2019) Embedding and learning with signatures
 
 
 
