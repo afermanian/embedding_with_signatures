@@ -19,6 +19,7 @@ metrics=['accuracy','f1_score']
 ll=1
 start_row=0
 n_processes=32
+arma_params={}
 
 if data=='motion_sense':
 	n_test_samples=30
@@ -64,7 +65,9 @@ elif data=='arma':
 
 results_df=pd.DataFrame(
 	{'accuracy':[],'embedding':[],'algo':[],'order':[],'n_features':[]})
-
+for metric in metrics:
+	results_df[metric]=[]
+print(results_df)
 
 # Load input data 
 for embedding in embedding_list:
@@ -95,10 +98,12 @@ for embedding in embedding_list:
 			print(test_results)
 
 			results_df=results_df.append(
-				{'accuracy':test_results['accuracy'],'embedding':embedding,
-				'algo':algo,'order':order,'n_features':train_X.shape[1],'error_l2':test_results['error_l2']},
+				{'embedding':embedding,
+				'algo':algo,'order':order,'n_features':train_X.shape[1]},
 				ignore_index=True)
 			print(results_df)
+			for metric in metrics:
+				results_df[metric].iloc[-1]=test_results[metric]
 
 
 			# Write the results in a separate text file.
@@ -134,7 +139,7 @@ for embedding in embedding_list:
 			file.close()
 
 results_df.to_csv(
-	os.path.join(results_dir,'%s_embedding_comparison.csv'%(data)))
+	os.path.join(results_dir,'%s_%s_embedding_comparison.csv'%(time.strftime("%m%d-%H%M%S"),data)))
 
 
 
