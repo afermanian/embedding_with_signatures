@@ -80,6 +80,7 @@ learnSig=LearnSig(algo,inputSig,n_processes=n_processes)
 
 learnSig.train(train_X,train_y,valid_X=valid_X,valid_y=valid_y)
 test_results=learnSig.evaluate(test_X,test_y,metrics=metrics)
+print(test_results)
 
 # Write the results in a separate text file.
 results_path=os.path.join(results_dir,learnSig.model_name+".txt")
