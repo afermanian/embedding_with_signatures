@@ -2,8 +2,8 @@ import pandas as pd
 import os
 
 #data_dir='/volumes/fermanian_disk/Data/embedding' # path to data repository
-data_dir='/users/home/fermanian/embedding/Quick-draw-signature'
-
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+data_dir=ROOT_DIR
 
 def save_motion_sense_shuffled_paths_df():
 	'''Create a csv with the path to all Motion Sense files and shuffle them.
