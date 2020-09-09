@@ -14,7 +14,7 @@ def dense_model_1(n_features,n_classes,lr=1):
 	model.compile(optimizer = opt, 
 	                          loss = 'categorical_crossentropy', 
 	                          metrics = ['categorical_accuracy', top_3_accuracy])
-	model.name="dense_model_1"
+	#model.name="dense_model_1"
 	model.summary()
 	return(model)
 
@@ -29,6 +29,6 @@ def dense_model_2(n_features,n_classes):
 	model.compile(optimizer = opt, 
 	                          loss = 'categorical_crossentropy', 
 	                          metrics = ['categorical_accuracy', top_3_accuracy])
-	model.name="dense_model_2"
+	#model.name="dense_model_2"
 	model.summary()
 	return(model)
