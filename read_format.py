@@ -138,7 +138,6 @@ class InputSig:
 		"""
 
 		if self.data=='motion_sense':
-			print(data_dir)
 			df=pd.read_csv(
 				os.path.join(
 					data_dir,'MotionSense/motion_sense_shuffled_paths.csv'),
@@ -230,7 +229,6 @@ class InputSig:
 
 
 		if self.data=='motion_sense':
-			print(data_dir,file)
 			raw_data = pd.read_csv(os.path.join(data_dir,file))
 			raw_data = raw_data.drop(['Unnamed: 0'], axis=1)
 			signal=np.array(raw_data.values)
